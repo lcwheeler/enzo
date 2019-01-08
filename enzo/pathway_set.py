@@ -37,10 +37,10 @@ class PathwaySet(object):
             optimum ratio of target species to sum of all other species
         target_index: int
             index of the target species in list of floating species IDS
-        constraint: tuple
-            lower and upper bound for total SS concentration
-        N: int
-            population size
+        constraint: float
+            fractional tolerance on total SS concentration
+        optimum_tolerance: float
+            fractional tolerance on optimum SS concentration of target
         iterations: int  
             number of iterations to perform (max length of trajectory)
         stop: bool
@@ -65,11 +65,8 @@ class PathwaySet(object):
             raise Exception('The Pathways in this set have already been evolved.')
             
     def collate_data(self):
-        """Organize the data from individual Pathway objects into a single dataset."""
+        """Organize the selection coefficient data from individual Pathway objects into a single dataset."""
         
-        # how to collate control coefficients and elasticites? Linearize the matrices and
-        # combine them into a single DataFrame where each row is a single trajectory and 
-        # each column is a matrix coordinate, specified by names (i.e. "DFR_DHK, DHK")
         s_dict = {}
         for key in self.params:
             s_dict[key] = []

@@ -8,8 +8,7 @@ import roadrunner
 from copy import copy, deepcopy
 
 class Pathway(object):
-    """A Model object class that contains methods for evolving the model between defined states. Simplified 
-    version with no fixation probabilities."""
+    """A Model object class that contains methods for evolving a Roadrunner/Tellurium model between defined states."""
 
     def __init__(self, model_string, name):
         """Initialize an instance of the Model() class."""
@@ -62,9 +61,6 @@ class Pathway(object):
         main_model = self.main_model
         species = list(main_model.getFloatingSpeciesIds())
         
-        # Set the steady state solver tolerance
-        #main_model.getSteadyStateSolver().relative_tolerance = 1e-25
-
 
         # Reset the main reference model (start) and make a copy to pass into the iterations
         main_model.resetToOrigin()
@@ -94,25 +90,15 @@ class Pathway(object):
         
         # Generate a random set of mutations
         np.random.seed()
-        #directions = np.random.choice([-1, 1], iterations+1)
-        #fractions = np.random.rand(iterations+1)
-        #kicks = np.random.uniform(0, 10, 20000, iterations+1)
-        #mutations = fractions*directions
-        #mutations = np.concatenate((kicks, mutations))
-        #mutations = np.random.permutation(mutations)
-
         self.mutations = np.random.gamma(0.8, 3, iterations+1)
         mutations = self.mutations
         
         IDs = np.random.choice(params, iterations+1)
         
         # Initialize tracking variables so the model can be reset in the event of error
-        # This will be a problem if SS calc. fails on first iteration (need to fix). 
-        # Could pull from model using first entry in IDs list.
-        self.last_val = getattr(model, IDs[0]) #0 
-        self.last_ID = IDs[0] #None 
+        self.last_val = getattr(model, IDs[0]) 
+        self.last_ID = IDs[0] 
         
-
         fixation_choices = [0, 1]
 
         # Iterate over generations of selection on steady state concentrations
@@ -150,8 +136,6 @@ class Pathway(object):
             self.last_ID = deepcopy(ID)
             
             # Use random parameter adjustments about the starting value (from pre-assembled lists)
-            #value = val + (val * fractions[i] * directions[i])
-            #value = val + val * mutations[i]
             value = val * mutations[i]
             model.setValue(id=ID, value=value)
             
@@ -178,15 +162,11 @@ class Pathway(object):
                 # Calculate the mutant fitness, relative fitness, and selection coefficient (s)
                 W = np.exp(-1*(metric_1 - optimum1)**2)
                 
-                # Maybe can use a boolean check for >=1 then use bool outcome as dict key to choose
-                # form of fixation prob, that way avoiding having slow conditionals? 
                 
                 # Keep track of fitness effects at each step (positive = good, negative = bad). 
                 # This is just a delta_W between previous state and new mutant state
                 s = W - W_current
 
-                #fitness_effects[ID].append(s/fractions[i])
-                #fitness_effects[ID].append(s/mutations[i]) # how to properly scale this? 
                 fitness_effects[ID].append(s)
                 
                 # Check if the mutant fitness is improved over previous state and calculate fixation 
@@ -226,7 +206,7 @@ class Pathway(object):
         concentrations = pd.DataFrame(concentrations, columns=species)
 
         # This step overwrites the model by creating a new replicate model and replacing parameters with 
-        # the evolved parameter set. Circumvents the issues with saved initial concentrations, etc. 
+        # the evolved parameter set. Circumvents issues with saved initial concentrations, etc. 
         gp = model.getGlobalParameterValues()
         reset_model = te.loada(self.model_string)
         reset_model.setValues(keys=params, values=gp)
@@ -238,6 +218,7 @@ class Pathway(object):
         
         # Builds a pd.DataFrame of the control coefficient and elasticity matrices. 
         # If it fails for some numerical (or other) reason, just ignores and saves the error message instead.
+        # These can be checked later to discard any models that result in errors. 
         try:
             self.cc_matrix = model.getScaledConcentrationControlCoefficientMatrix()
             self.cc_matrix = pd.DataFrame(self.cc_matrix, columns=[name for name in self.cc_matrix.colnames], index=[name for name in self.cc_matrix.rownames])
