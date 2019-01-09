@@ -119,7 +119,7 @@ evolving_set.generate(model_string, 10000)
 # Evolve the PathwaySet ensemble toward 90% delphinidin optimum
 evolving_set.evolve(params=param_trim, optimum1=0.9, target_index=13, total = 12.2, constraint = 0.1, optimum_tolerance = 0.1, iterations = 50000)
 
-# Save the fill PathwaySet with all data as a single pickled object
+# Save the full PathwaySet with all data as a single pickled object
 evolving_set.save_set()
 
 
