@@ -95,7 +95,6 @@ model_string = """
     
     # Source influx
     const PCoA = 0.01;
-    #PCoA = 1000;
 """
 
 
