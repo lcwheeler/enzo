@@ -4,7 +4,7 @@ enzo is a Python wrapper for Tellurium allowing evolution of metabolic models be
 
 Example:
 
-This example re-runs the stochastic evolutionary simulations performed in our preprint [Computational modeling of anthocyanin pathway evolution](https://www.biorxiv.org/content/early/2019/01/03/511089). 
+This example re-runs the stochastic evolutionary simulations performed in our paper [Computational modeling of anthocyanin pathway evolution: Biases, hotspots, and trade-offs](https://www.biorxiv.org/content/early/2019/01/03/511089). 
 
 
 ```python
