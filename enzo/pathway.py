@@ -319,7 +319,7 @@ class FlexFitPathway(object):
         
         
         # Initialize some lists and dictionaries to hold the simulation trajectories
-        parameters = [] #parameters = {} #this would be consistent with the modified structure below. 
+        parameters = [] #parameters[("ID", "param_value", "sel_coeff", "prob_fix")] = []
         concentrations = []
         optima = {}
         
@@ -451,10 +451,7 @@ class FlexFitPathway(object):
                         concentrations.append(SS_values)
                         # Store the parameter ID, value, and selection coefficient. 
                         # Need to modify this, to include names of variables. dict() might be simplest, like this. 
-                        # parameters["ID"] = ID
-                        # parameters["param_value"] = value
-                        # parameters["sel_coeff"] = s
-                        # parameters["prob_fix"] = P
+                        # parameters[("ID", "param_value", "sel_coeff", "prob_fix")].append((ID, value, s, P)) 
                         parameters.append((ID, value, s, P)) 
 
                         # Check to see if the steady state is within tolerance of the optimum and save if it is.
