@@ -270,12 +270,24 @@ class Pathway(object):
 
 
 ## An alternative Pathway object with more flexible fitness function
+## Eventually this object will replace the Pathway object entirely
 
 class FlexFitPathway(object):
     """A Model object class that contains methods for evolving a Roadrunner/Tellurium model between defined states."""
 
     def __init__(self, model_string, name):
-        """Initialize an instance of the Model() class."""
+        """Initialize an instance of the Model() class.
+
+        Parameters
+
+        ----------
+
+        model_string: str
+            antimony string describing model equations
+        name: str
+            a string to name the object instance
+
+        """
         
         # Initialize some important object attributes
         self.model_string = model_string
@@ -369,11 +381,18 @@ class FlexFitPathway(object):
         self.last_val = getattr(model, IDs[0]) 
         self.last_ID = IDs[0] 
         
+        # Initialize a list of fixation choices for downstream: 0 = fix, 1 = don't fix
         fixation_choices = [0, 1]
+        
+        # Initialize a counter to keep track of the arrival time for each fixation (i.e. number of attempts)
+        arrival = 0
 
         # Iterate over generations of selection on steady state concentrations
         for i in range(iterations):
             model.reset()
+            
+            # Add 1 to the arrival time counter
+            arrival += 1
 
             # Calculate the current fitness before changing parameter values
             model.getSteadyStateSolver().relative_tolerance = 1e-25
@@ -409,7 +428,8 @@ class FlexFitPathway(object):
             # Use random parameter adjustments about the starting value (from pre-assembled lists)
             value = val * mutations[i]
             model.setValue(id=ID, value=value)
-            
+            delta = value - val # for book-keeping
+
             # Calculate the steady state concentrations of species in pathway
             model.getSteadyStateSolver().relative_tolerance = 1e-25
 
@@ -440,7 +460,7 @@ class FlexFitPathway(object):
                 fitness_effects[ID].append(s)
                 
                 # Check if the mutant fitness is improved over previous state and calculate fixation 
-                # probability accordingly. Discard neutral and deleterious mutations (Pfix ~ 0). 
+                # probability accordingly. Discard neutral and deleterious mutations (because Pfix ~ 0). 
                 if W >= W_current: 
 
                     P = (1-np.exp(-s))
@@ -449,10 +469,13 @@ class FlexFitPathway(object):
                     if f == 0:
                         # Store the steady state concentrations at this step.
                         concentrations.append(SS_values)
-                        # Store the parameter ID, value, and selection coefficient. 
-                        # Need to modify this, to include names of variables. dict() might be simplest, like this. 
-                        # parameters[("ID", "param_value", "sel_coeff", "prob_fix")].append((ID, value, s, P)) 
-                        parameters.append((ID, value, s, P)) 
+
+                        # Store the parameter ID, value, selection coefficient, delta effect size, and 
+                        # arrival time of mutation in a dict, add to the parameters attribute (list of dicts).
+                        parameters.append({"ID": ID, "value": value, "s":s, "P_fix":P, "delta":delta, "arrival":arrival}) 
+
+                        # reset the arrival time to 0 to begin count again until next fixation event
+                        arrival = 0
 
                         # Check to see if the steady state is within tolerance of the optimum and save if it is.
                         if metric_1 > (optimum1 - optimum1*optimum_tolerance) and metric_1 < (optimum1 + optimum1*optimum_tolerance):
@@ -478,7 +501,7 @@ class FlexFitPathway(object):
         concentrations = pd.DataFrame(concentrations, columns=species)
 
         # This step overwrites the model by creating a new replicate model and replacing parameters with 
-        # the evolved parameter set. Circumvents issues with saved initial concentrations, etc. 
+        # the evolved parameter set. Circumvents potential issues with saved initial concentrations, etc. 
         gp = model.getGlobalParameterValues()
         reset_model = te.loada(self.model_string)
         reset_model.setValues(keys=params, values=gp)
