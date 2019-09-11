@@ -305,9 +305,9 @@ class FlexFitPathway(object):
         ----------
 
         params: 1D array-like
-            list of parameter keys
+            list of parameter key strings
         optimum1: int
-            optimum ratio of target species to sum of all other species
+            optimum ratio of sum of target species to sum of denominator species
         numerator_indexes: list
             List of indexes of the target species in array of floating species IDs
         denominator_indexes: list
