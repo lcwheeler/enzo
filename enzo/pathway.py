@@ -470,9 +470,9 @@ class FlexFitPathway(object):
                         # Store the steady state concentrations at this step.
                         concentrations.append(SS_values)
 
-                        # Store the parameter ID, value, selection coefficient, delta effect size, and 
-                        # arrival time of mutation in a dict, add to the parameters attribute (list of dicts).
-                        parameters.append({"ID": ID, "value": value, "s":s, "P_fix":P, "delta":delta, "arrival":arrival}) 
+                        # Store the parameter ID, value, selection coefficient, delta effect size, metric_1, fitness,
+                        # and arrival time of mutation in a dict, add to the parameters attribute (list of dicts).
+                        parameters.append({"ID": ID, "value": value, "s":s, "P_fix":P, "delta":delta, "arrival":arrival, "distance":metric_1, "fitness":W}) 
 
                         # reset the arrival time to 0 to begin count again until next fixation event
                         arrival = 0
