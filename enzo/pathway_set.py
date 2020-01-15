@@ -1,4 +1,4 @@
-from .pathway import Pathway, FlexFitPathway
+from .pathway import Pathway
 from copy import copy
 import matplotlib.pyplot as plt
 import pickle
@@ -17,7 +17,7 @@ class PathwaySet(object):
         """Generate a set of Pathway() objects."""
         
         if bool(self.pathway_set) == False:
-            ref_model = FlexFitPathway(model_string, name = "ref")
+            ref_model = Pathway(model_string, name = "ref")
 
             for i in range(num_pathways):
                 self.pathway_set[i] = copy(ref_model)
