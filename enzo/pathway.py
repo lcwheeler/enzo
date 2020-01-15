@@ -164,7 +164,7 @@ class Pathway(object):
             # Use random parameter adjustments about the starting value (from pre-assembled lists)
             value = val * mutations[i]
             model.setValue(id=ID, value=value)
-            delta = value - val # for book-keeping
+            delta = (value - val)/val # for book-keeping
 
             # Calculate the steady state concentrations of species in pathway
             model.getSteadyStateSolver().relative_tolerance = 1e-25
@@ -206,7 +206,7 @@ class Pathway(object):
                         # Store the steady state concentrations at this step.
                         concentrations.append(SS_values)
 
-                        # Store the parameter ID, value, selection coefficient, delta effect size, metric_1, fitness,
+                        # Store the parameter ID, value, selection coefficient, delta mut. effect size, metric_1, fitness,
                         # and arrival time of mutation in a dict, add to the parameters attribute (list of dicts).
                         parameters.append({"ID": ID, "value": value, "s":s, "P_fix":P, "delta":delta, "arrival":arrival, "distance":metric_1, "fitness":W}) 
 
