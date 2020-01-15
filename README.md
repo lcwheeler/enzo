@@ -1,5 +1,5 @@
 # enzo
-enzo is a Python wrapper for Tellurium allowing evolution of metabolic models between defined states
+enzo is a Python wrapper for Tellurium allowing evolution of metabolic models between defined phenotypic states
 
 
 Example:
@@ -115,8 +115,8 @@ for n in param:
 evolving_set = PathwaySet("example_simulations")
 evolving_set.generate(model_string, 10000)
 
-# Evolve the PathwaySet ensemble toward 90% delphinidin optimum
-evolving_set.evolve(params=param_trim, optimum1=0.9, target_index=13, total = 12.2, constraint = 0.1, optimum_tolerance = 0.1, iterations = 50000)
+# Evolve the PathwaySet ensemble toward a 90% delphinidin optimum
+evolving_set.evolve(params=param_trim, optimum1=0.9, numerator_indexes = [13], denominator_indexes = [0,1,2,3,4,5,6,7,8,9,10,11,12,13], total = 12.2, constraint = 0.1, optimum_tolerance = 0.1, iterations = 50000)
 
 # Save the full PathwaySet with all data as a single pickled object
 evolving_set.save_set()
