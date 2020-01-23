@@ -121,7 +121,9 @@ class Pathway(object):
         fixation_choices = [0, 1]
         
         # Initialize a counter to keep track of the arrival time for each fixation (i.e. number of attempts)
+        # Add a second counter for keeping track of fixation steps
         arrival = 0
+        step_counter = 0
 
         # Iterate over generations of selection on steady state concentrations
         for i in range(iterations):
@@ -203,12 +205,15 @@ class Pathway(object):
                     f = np.random.choice(fixation_choices, p = [P, 1-P])
 
                     if f == 0:
+                        # Add one to the fixation counter to flag each event
+                        step_counter =+ 1
+
                         # Store the steady state concentrations at this step.
                         concentrations.append(SS_values)
 
                         # Store the parameter ID, value, selection coefficient, delta mut. effect size, metric_1, fitness,
-                        # and arrival time of mutation in a dict, add to the parameters attribute (list of dicts).
-                        parameters.append({"ID": ID, "value": value, "s":s, "P_fix":P, "delta":delta, "arrival":arrival, "distance":metric_1, "fitness":W}) 
+                        # step number, and arrival time of mutation in a dict, add to the parameters attribute (list of dicts).
+                        parameters.append({"ID": ID, "value": value, "s":s, "P_fix":P, "delta":delta, "arrival":arrival, "distance":metric_1, "fitness":W, "step":step_counter}) 
 
                         # reset the arrival time to 0 to begin count again until next fixation event
                         arrival = 0
