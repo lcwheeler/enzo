@@ -68,19 +68,27 @@ class PathwaySet(object):
             raise Exception('The Pathways in this set have already been evolved.')
             
     def collate_data(self):
-        """Organize the selection coefficient data from individual Pathway objects into a single dataset."""
+        """Organize the selection coefficient and mut. effect size data from individual Pathway objects into a single dataset."""
         
         s_dict = {}
+        delta_dict = {}
+
         for key in self.params:
             s_dict[key] = []
-            
+            delta_dict[key] = []
+
         for v in self.pathway_set.values():
             for key in v.fitness_effects.keys():
                 for a in v.fitness_effects[key]:
                     s_dict[key].append(a)
-                    
-        self.fitness_effects = s_dict
 
+        for v in self.pathway_set.values():
+            for key in v.delta_effects.keys():
+                for a in v.delta_effects[key]:
+                    delta_dict[key].append(a)
+
+        self.fitness_effects = s_dict
+        self.delta_dict = delta_dict
         
     def save_pathways(self):
         """Save each individual Pathway object as a pickle file."""

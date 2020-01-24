@@ -67,15 +67,17 @@ class Pathway(object):
         
         
         # Initialize some lists and dictionaries to hold the simulation trajectories
-        parameters = [] #parameters[("ID", "param_value", "sel_coeff", "prob_fix")] = []
+        parameters = [] 
         concentrations = []
         optima = {}
         
         # Build a dictionary to hold the fitness effects of each mutation (as list of effects for each parameter).
         fitness_effects = {}
+        delta_effects = {}
         for key in params:
             fitness_effects[key] = []
-        
+            delta_effects[key] = []
+
         main_model = self.main_model
         species = list(main_model.getFloatingSpeciesIds())
         
@@ -196,6 +198,7 @@ class Pathway(object):
                 s = W - W_current
 
                 fitness_effects[ID].append(s)
+                delta_effects[ID].append(delta)
                 
                 # Check if the mutant fitness is improved over previous state and calculate fixation 
                 # probability accordingly. Discard neutral and deleterious mutations (because Pfix ~ 0). 
@@ -274,7 +277,8 @@ class Pathway(object):
         self.model = reset_model.getCurrentSBML()
         self.optima = optima
         self.fitness_effects = fitness_effects
-        
+        self.delta_effects = delta_effects
+
     def plot_ss(self):
         """Return a plot of the steady state concentrations for the final evolved model."""
         
@@ -292,7 +296,7 @@ class Pathway(object):
         plt.xlabel("Metabolite name");
 
         print("The total concentration is " + str(np.sum(SS_values)) + "mM")
-        print("The ratio of the target species to all others species is "+ str(np.sum(SS_values[self.numerator_indexes])/np.sum(SS_values[self.denominator_indexes])))
+        print("The ratio of the target species to the other specified species is "+ str(np.sum(SS_values[self.numerator_indexes])/np.sum(SS_values[self.denominator_indexes])))
 
     def save_data(self):
         """Function to save the simulated data as compressed pickle files."""
