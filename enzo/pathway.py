@@ -378,8 +378,8 @@ class PathwayMod(object):
         delta_effects = {}
         for key in params:
             fitness_effects[key] = []
-            delta_effects[key] = []
-
+            delta_effects[key] = [] # Can also add a "bad" mutations logger to track numerical issues
+     
         main_model = self.main_model
         species = list(main_model.getFloatingSpeciesIds())
         
@@ -451,12 +451,12 @@ class PathwayMod(object):
                 model.setValue(id=self.last_ID, value=self.last_val)
                 model.reset()
                 print(i, e)
-                continue
+                continue #Should add a call to append to the "bad" mutations catcher here
             
             # Calculate the distance of the current model SS from optimum
             metric_current_1 = np.sum(SS_values_current[numerator_indexes])/np.sum(SS_values_current[denominator_indexes]) 
+            # This 2nd metric incorporates the constraint on total steady state concentration
             metric_current_2 = np.sum(SS_values_current)/total
-
 
             # Calculate the current fitness as the negative exp of distance from optimum
             W_current = np.exp(-1*(metric_current_1 - optimum1)**2) * np.exp(-1*(metric_current_2 - constraint)**2)
@@ -497,7 +497,7 @@ class PathwayMod(object):
 
                 
                 # Calculate the mutant fitness, relative fitness, and selection coefficient (s)
-                W = np.exp(-1*(metric_1 - optimum1)**2) * np.exp(-1*(metric_2 - 1)**2)
+                W = np.exp(-1*(metric_1 - optimum1)**2) * np.exp(-1*(metric_2 - constraint)**2)
                 
                 # Keep track of fitness effects at each step (positive = good, negative = bad). 
                 # This is just a delta_W between previous state and new mutant state
@@ -545,7 +545,7 @@ class PathwayMod(object):
             else:
                 model.setValue(id=ID, value=val)
                 model.reset()
-                continue
+                continue #Should add a call to append to the "bad" mutations catcher here
                 
         # Store the concentrations from each step as a DataFrame
         concentrations = pd.DataFrame(concentrations, columns=species)
