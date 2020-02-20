@@ -104,7 +104,7 @@ class PathwaySet(object):
 
 
 #######################################################################################################
-####### Modified version of the PathwaySet object that
+####### Modified version of the PathwaySet object that incorporates constraint into fitness function
 
 class PathwaySetMod(object):
     """Object class that holds a set of Pathway() objects, with methods to access data from all objects."""
@@ -119,7 +119,7 @@ class PathwaySetMod(object):
         """Generate a set of Pathway() objects."""
         
         if bool(self.pathway_set) == False:
-            ref_model = Pathway(model_string, name = "ref")
+            ref_model = PathwayMod(model_string, name = "ref")
 
             for i in range(num_pathways):
                 self.pathway_set[i] = copy(ref_model)
@@ -219,7 +219,7 @@ class PathwaySetFlex(object):
         """Generate a set of Pathway() objects."""
         
         if bool(self.pathway_set) == False:
-            ref_model = Pathway(model_string, name = "ref")
+            ref_model = PathwayFlex(model_string, name = "ref")
 
             for i in range(num_pathways):
                 self.pathway_set[i] = copy(ref_model)
