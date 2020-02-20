@@ -913,7 +913,7 @@ class PathwayFlex(object):
         # Builds a pd.DataFrame of the control coefficient and elasticity matrices. 
         # If it fails for some numerical (or other) reason, just ignores and saves the error message instead.
         # These can be checked later to discard any models that result in errors. 
-        if MCA = "True":
+        if MCA == "True":
             try:
                 self.cc_matrix = model.getScaledConcentrationControlCoefficientMatrix()
                 self.cc_matrix = pd.DataFrame(self.cc_matrix, columns=[name for name in self.cc_matrix.colnames], index=[name for name in self.cc_matrix.rownames])
