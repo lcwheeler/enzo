@@ -674,8 +674,8 @@ class PathwayFlex(object):
         # Then evaluate the user-input W_func_args dict() to get usable argument sets
         self.W_func = W_func
     
-        self.W_func_args_current = self.W_func_args["current"]
-        self.W_func_args_mutant = self.W_func_args["mutant"]
+        self.W_func_args_current = W_func_args["current"]
+        self.W_func_args_mutant = W_func_args["mutant"]
 
         for key in self.W_func_args_current.keys():
             if type(self.W_func_args_current[key]) == str or type(self.W_func_args_current[key]) == bytes or type(self.W_func_args_current[key]) == object:
