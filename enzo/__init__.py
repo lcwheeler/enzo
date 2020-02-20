@@ -1,2 +1,2 @@
-from .pathway import Pathway, PathwayMod
-from .pathway_set import PathwaySet, PathwaySetMod
+from .pathway import Pathway, PathwayMod, PathwayFlex
+from .pathway_set import PathwaySet, PathwaySetMod, PathwaySetFlex
