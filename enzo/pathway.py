@@ -670,8 +670,8 @@ class PathwayFlex(object):
         """
 
         # Initialize blank version of SS_values_current and SS_values
-        SS_values_current = [i for i in range(0,13)] # These either need to moved or initialized with the appropriate length/number of entries
-        SS_values = [i for i in range(0,13)]
+        SS_values_current = [i for i in range(0,14)] # These either need to moved or initialized with the appropriate length/number of entries
+        SS_values = [i for i in range(0,14)]
 
         # Store W_func and W_func_args as attributes. 
         # Then evaluate the user-input W_func_args dict() to get usable argument sets
