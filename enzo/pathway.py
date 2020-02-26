@@ -640,11 +640,10 @@ class PathwayFlex(object):
         self.main_model = te.loada(model_string)
         self.name = name
 
-    def evolve(self, params, W_func, W_func_args, mutation_func, mutation_func_args, optimum_tolerance = 0.1, iterations=10000, stop=True, MCA=True):
+    def evolve(self, params, W_func, W_func_args, mutation_func, mutation_func_args, Pfix_func, Pfix_func_args, optimum_tolerance = 0.1, iterations=10000, stop=True, MCA=True):
 
         """Function to sample the parameter space of the model one parameter at a time and evolve toward a 
-        user defined fitness optimum. Fixation probabilities are calculated assuming stabilizing 
-        selection on steady state concentration of species, according to user-input custom fitness function.
+        user defined fitness function, mutational sampling process. Fixation probabilities are calculated according to user-input custom fixation probability function.
         
         Parameters
 
@@ -655,9 +654,17 @@ class PathwayFlex(object):
         optimum: int
             optimum value that defines fitness peak
         W_func: function
-            Custom fitness function 
+            Custom fitness function
         W_func_args: dict()
-            Nested dictionary with "current" and "mutant" args for W_func
+            Nested dictionary with "current" and "mutant" args for W_func (must reference 'SS_values_current' and 'SS_values' variables)
+        mutation_func: function
+            Custom mutation process function  (requires 'size' argument)
+        mutation_func_args: dict()
+            Dictionary containing arguments for mutation_func
+        Pfix_func: function
+            Custom fixation probability function 
+        Pfix_func_args: dict()
+            Dictionary containing arguments for Pfix_func
         optimum_tolerance: float
             fractional tolerance on optimum value (only used if optimum is defined)
         iterations: int  
@@ -674,15 +681,6 @@ class PathwayFlex(object):
         self.W_func_args_current = W_func_args["current"]
         self.W_func_args_mutant = W_func_args["mutant"]
 
-        # Store mutation_func and mutation_func_args as attributes. Used to generate set of mutations.
-        self.mutation_func = mutation_func
-        self.mutation_func_args = mutation_func_args
-
-        # Store Pfix_func and Pfix_func_args as attributes. Used downstream to calculate fixation prob.
-        #self.Pfix_func = Pfix_func
-        #self.Pfix_func_args = Pfix_func_args
-
-
         # Determine if there is an argument called 'optimum' in W_func, to ask whether to use optimum tolerance
         if "optimum" in list(self.W_func.__code__.co_varnames):
             peak = True
@@ -692,7 +690,24 @@ class PathwayFlex(object):
         else:
             peak = False
             self.peak = peak
-        
+
+        # Store mutation_func and mutation_func_args as attributes. Used to generate set of mutations.
+        self.mutation_func = mutation_func
+        self.mutation_func_args = mutation_func_args
+
+        # Check to make sure that the size/length of mutations argument if greater than number of iterations
+        if "size" in list(self.mutation_func_args.keys()):
+            size_test = eval(self.mutation_func_args["size"]
+            if size_test < iterations:
+                print("'size' argument of mutation_func must be greater than number of iterations.")
+            else:
+                pass
+        else:
+            print("Your mutation_func requires a 'size' argument to ensure proper length of muations list")
+
+        # Store Pfix_func and Pfix_func_args as attributes. Used downstream to calculate fixation prob.
+        self.Pfix_func = Pfix_func
+        self.Pfix_func_args = Pfix_func_args
         
         # Initialize some lists and dictionaries to hold the simulation trajectories
         parameters = [] # Stores pertinent information for fixation events
@@ -710,7 +725,6 @@ class PathwayFlex(object):
         main_model = self.main_model
         species = list(main_model.getFloatingSpeciesIds())
         
-
         # Reset the main reference model (start) and make a copy to pass into the iterations
         main_model.resetToOrigin()
         model = copy(main_model)
@@ -872,8 +886,21 @@ class PathwayFlex(object):
                 # Check if the mutant fitness is improved over previous state and calculate fixation 
                 # probability accordingly. Discard neutral and deleterious mutations (because Pfix ~ 0). 
                 if W >= W_current: 
-                    # Should make the Pfix_func flexible argument. Maybe make it be a function of s and other args? 
-                    P = (1-np.exp(-s)) # P = Pfix_func(**self.Pfix_func_args)
+
+                # Evaluate the arguments for the user-defined fixation prob function. 
+                Pfix_func_args_i = copy(self.Pfix_func_args)
+                for key in Pfix_func_args_i.keys():
+                    if type(Pfix_func_args_i[key]) == str or type(Pfix_func_args_i[key]) == bytes or type(Pfix_func_args_i[key]) == object:
+                        # This needs to update a COPY of the args! Need to keep input args as a reference! 
+                        Pfix_func_args_i[key] = eval(Pfix_func_args_i[key])
+                    else:
+                        pass
+
+                    # Make the Pfix_func flexible argument. Maybe make it be a function of s and other args? 
+                    #P = (1-np.exp(-s)) 
+                    P = self.Pfix_func(**self.Pfix_func_args)
+
+                    # Use random choice to sample fixation True(0)/False(1) based on calculated probability
                     f = np.random.choice(fixation_choices, p = [P, 1-P])
 
                     if f == 0:
