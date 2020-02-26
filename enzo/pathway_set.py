@@ -227,7 +227,7 @@ class PathwaySetFlex(object):
         else:
             raise Exception('A pathway set has already been generated.')
             
-    def evolve(self, params, W_func, W_func_args, optimum, optimum_tolerance, iterations, stop, MCA):
+    def evolve(self, params, W_func, W_func_args, optimum_tolerance, iterations, stop, MCA):
 
         """Evolve all of the pathway objects stored in pathway_set. Using the built-in evolve function in Pathway.
 
@@ -258,7 +258,7 @@ class PathwaySetFlex(object):
             self.params = params
 
             for i in range(len(self.pathway_set.keys())):
-                self.pathway_set[i].evolve(params, W_func, W_func_args, optimum, optimum_tolerance, iterations, stop, MCA)
+                self.pathway_set[i].evolve(params, W_func, W_func_args, optimum_tolerance, iterations, stop, MCA)
             
             self.evolved = True
             
