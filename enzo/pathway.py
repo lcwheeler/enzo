@@ -640,7 +640,7 @@ class PathwayFlex(object):
         self.main_model = te.loada(model_string)
         self.name = name
 
-    def evolve(self, params, W_func, W_func_args, optimum_tolerance = 0.1, iterations=10000, stop=True, MCA=True):
+    def evolve(self, params, W_func, W_func_args, mutation_func, mutation_func_args, optimum_tolerance = 0.1, iterations=10000, stop=True, MCA=True):
 
         """Function to sample the parameter space of the model one parameter at a time and evolve toward a 
         user defined fitness optimum. Fixation probabilities are calculated assuming stabilizing 
@@ -673,6 +673,14 @@ class PathwayFlex(object):
         self.W_func = W_func
         self.W_func_args_current = W_func_args["current"]
         self.W_func_args_mutant = W_func_args["mutant"]
+
+        # Store mutation_func and mutation_func_args as attributes. Used to generate set of mutations.
+        self.mutation_func = mutation_func
+        self.mutation_func_args = mutation_func_args
+
+        # Store Pfix_func and Pfix_func_args as attributes. Used downstream to calculate fixation prob.
+        #self.Pfix_func = Pfix_func
+        #self.Pfix_func_args = Pfix_func_args
 
 
         # Determine if there is an argument called 'optimum' in W_func, to ask whether to use optimum tolerance
@@ -728,10 +736,18 @@ class PathwayFlex(object):
         
         # Turn off roadrunner logging to save memory
         roadrunner.Logger_disableLogging() 
-        
-        # Generate a random set of mutations
+
+        # Evaluate the arguments for the user-defined mutation function (eval only needed for certain types)
+        for key in self.mutation_func_args.keys():
+            if type(self.mutation_func_args[key]) == str or type(self.mutation_func_args[key]) == bytes or type(self.mutation_func_args[key]) == object:
+                self.mutation_func_args[key] = eval(self.mutation_func_args[key]) 
+            else:
+                pass
+
+        # Generate a random set of mutations using user-defined mutation function
         np.random.seed() # Need to store the seed used as attribute for reproducibility. 
-        self.mutations = np.random.gamma(0.8, 3, iterations+1) # self.mutations = self.mutation_func(**self.mutation_func_args)
+        #self.mutations = np.random.gamma(0.8, 3, iterations+1) 
+        self.mutations = self.mutation_func(**self.mutation_func_args)
         mutations = self.mutations
         
         IDs = np.random.choice(params, iterations+1)
