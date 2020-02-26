@@ -891,7 +891,7 @@ class PathwayFlex(object):
                     Pfix_func_args_i = copy(self.Pfix_func_args)
                     for key in Pfix_func_args_i.keys():
                         if type(Pfix_func_args_i[key]) == str or type(Pfix_func_args_i[key]) == bytes or type(Pfix_func_args_i[key]) == object:
-                        Pfix_func_args_i[key] = eval(Pfix_func_args_i[key])
+                            Pfix_func_args_i[key] = eval(Pfix_func_args_i[key])
                     else:
                         pass
 
