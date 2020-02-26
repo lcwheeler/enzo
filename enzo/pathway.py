@@ -888,10 +888,9 @@ class PathwayFlex(object):
                 if W >= W_current: 
 
                 # Evaluate the arguments for the user-defined fixation prob function. 
-                Pfix_func_args_i = copy(self.Pfix_func_args)
-                for key in Pfix_func_args_i.keys():
-                    if type(Pfix_func_args_i[key]) == str or type(Pfix_func_args_i[key]) == bytes or type(Pfix_func_args_i[key]) == object:
-                        # This needs to update a COPY of the args! Need to keep input args as a reference! 
+                    Pfix_func_args_i = copy(self.Pfix_func_args)
+                    for key in Pfix_func_args_i.keys():
+                        if type(Pfix_func_args_i[key]) == str or type(Pfix_func_args_i[key]) == bytes or type(Pfix_func_args_i[key]) == object:
                         Pfix_func_args_i[key] = eval(Pfix_func_args_i[key])
                     else:
                         pass
