@@ -640,7 +640,7 @@ class PathwayFlex(object):
         self.main_model = te.loada(model_string)
         self.name = name
 
-    def evolve(self, params, W_func, W_func_args, optimum, optimum_tolerance = 0.1, iterations=10000, stop=True, MCA=True):
+    def evolve(self, params, W_func, W_func_args, optimum_tolerance = 0.1, iterations=10000, stop=True, MCA=True):
 
         """Function to sample the parameter space of the model one parameter at a time and evolve toward a 
         user defined fitness optimum. Fixation probabilities are calculated assuming stabilizing 
@@ -834,10 +834,9 @@ class PathwayFlex(object):
                 # Check to see if the function contains an "opt_metric" variable
                 if "opt_metric" in list(self.W_func.__code__.co_varnames):
                     W, opt_metric = W_func(**self.W_func_args_mutant)
-
+                    print(W, opt_metric)
                 elif "opt_metric" not in list(self.W_func.__code__.co_varnames):
                     W = W_func(**self.W_func_args_mutant)
-
                 else:
                     print("'opt_metric' is missing from your W_func_args input!") 
 
@@ -872,6 +871,7 @@ class PathwayFlex(object):
 
                         # Check to see if the steady state is within tolerance of the optimum and save if it is.
                         if peak == True:
+
                             if opt_metric > (self.optimum - self.optimum*optimum_tolerance) and opt_metric < (self.optimum + optimum*self.optimum_tolerance):
                                 model.reset()
                                 optima[i] = [tuple(SS_values), tuple(model.getGlobalParameterValues())]
@@ -880,7 +880,7 @@ class PathwayFlex(object):
                                     break 
                     
                     else:
-                        print("DID NOT FIX")
+                        #print("DID NOT FIX")
                         model.setValue(id=ID, value=val)
                         model.reset()
 
