@@ -680,7 +680,7 @@ class PathwayFlex(object):
             peak = True
             self.optimum = self.W_func_args_current["optimum"]
             self.peak = peak
-            self.optimum_tolerance
+            self.optimum_tolerance = optimum_tolerance
         else:
             peak = False
             self.peak = peak
