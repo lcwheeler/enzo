@@ -686,9 +686,10 @@ class PathwayFlex(object):
         
         
         # Initialize some lists and dictionaries to hold the simulation trajectories
-        parameters = [] 
-        concentrations = []
-        optima = {}
+        parameters = [] # Stores pertinent information for fixation events
+        concentrations = [] # Stores concentration trajectories for fixations
+        optima = {} # Stores pertinent information regarding final optimum state
+        bad_mutations = [] # catches mutations that violate steady state solution condition
         
         # Build a dictionary to hold the fitness effects of each mutation (as list of effects for each parameter).
         fitness_effects = {}
@@ -877,8 +878,7 @@ class PathwayFlex(object):
 
                                 if stop == True: 
                                     break 
-                        #else:
-                            #pass 
+
                     else:
                         model.setValue(id=ID, value=val)
                         model.reset()
@@ -887,10 +887,11 @@ class PathwayFlex(object):
                     model.setValue(id=ID, value=val)
                     model.reset()
 
-            else:
+            else: # Append to the "bad" mutations catcher here if steady state condition is violated
                 model.setValue(id=ID, value=val)
                 model.reset()
-                continue #Should add a call to append to the "bad" mutations catcher here
+                bad_mutations.append({"ID": ID, "value": value, "delta":delta})
+                continue 
                 
         # Store the concentrations from each step as a DataFrame
         concentrations = pd.DataFrame(concentrations, columns=species)
@@ -921,8 +922,6 @@ class PathwayFlex(object):
                 self.cc_matrix = None
                 self.elasticities = None
                 self.mca_error = str(e)
-        #else:
-            #pass
             
         # Assign the evolver output to attributes of the Pathway object 
         self.concentrations = concentrations 
@@ -932,6 +931,7 @@ class PathwayFlex(object):
         self.optima = optima
         self.fitness_effects = fitness_effects
         self.delta_effects = delta_effects
+        self.bad_mutations = bad_mutations
 
     def plot_ss(self):
         """Return a plot of the steady state concentrations for the final evolved model."""
