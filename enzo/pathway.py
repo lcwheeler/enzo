@@ -839,7 +839,6 @@ class PathwayFlex(object):
                 # Check to see if the function contains an "opt_metric" variable
                 if "opt_metric" in list(self.W_func.__code__.co_varnames):
                     W, opt_metric = W_func(**W_func_args_mutant_i)
-                    print(W, opt_metric)
                 elif "opt_metric" not in list(self.W_func.__code__.co_varnames):
                     W = W_func(**W_func_args_mutant_i)
                 else:
@@ -877,7 +876,7 @@ class PathwayFlex(object):
                         # Check to see if the steady state is within tolerance of the optimum and save if it is.
                         if peak == True:
 
-                            if opt_metric > (self.optimum - self.optimum*optimum_tolerance) and opt_metric < (self.optimum + optimum*self.optimum_tolerance):
+                            if opt_metric > (self.optimum - self.optimum*self.optimum_tolerance) and opt_metric < (self.optimum + self.optimum*self.optimum_tolerance):
                                 model.reset()
                                 optima[i] = [tuple(SS_values), tuple(model.getGlobalParameterValues())]
 
@@ -885,7 +884,6 @@ class PathwayFlex(object):
                                     break 
                     
                     else:
-                        #print("DID NOT FIX")
                         model.setValue(id=ID, value=val)
                         model.reset()
 
