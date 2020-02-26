@@ -773,9 +773,11 @@ class PathwayFlex(object):
                 continue 
 
             # Evaluate the arguments for the user-defined fitness function for current state. 
-            for key in self.W_func_args_current.keys():
-                if type(self.W_func_args_current[key]) == str or type(self.W_func_args_current[key]) == bytes or type(self.W_func_args_current[key]) == object:
-                    self.W_func_args_current[key] = eval(self.W_func_args_current[key]) 
+            # Do the evaluation in a copy of the W_func_args_current attribute to keep attr as reference
+            W_func_args_current_i = copy(self.W_func_args_current)
+            for key in W_func_args_current_i.keys():
+                if type(W_func_args_current_i[key]) == str or type(W_func_args_current_i[key]) == bytes or type(W_func_args_current_i[key]) == object:
+                    W_func_args_current_i[key] = eval(W_func_args_current_i[key]) 
                 else:
                     pass
 
@@ -823,9 +825,12 @@ class PathwayFlex(object):
             if all(i > 0 for i in SS_values):
 
                 # Evaluate the arguments for the user-defined fitness function for mutant state. 
-                for key in self.W_func_args_mutant.keys():
-                    if type(self.W_func_args_mutant[key]) == str or type(self.W_func_args_mutant[key]) == bytes or type(self.W_func_args_mutant[key]) == object:
-                        self.W_func_args_mutant[key] = eval(self.W_func_args_mutant[key])
+                # Do the evaluation in a copy of the W_func_args_mutant attribute to keep attr as reference
+                W_func_args_mutant_i = copy(self.W_func_args_mutant)
+                for key in W_func_args_mutant_i.keys():
+                    if type(W_func_args_mutant_i[key]) == str or type(W_func_args_mutant_i[key]) == bytes or type(W_func_args_mutant_i[key]) == object:
+                        # This needs to update a COPY of the args! Need to keep input args as a reference! 
+                        W_func_args_mutant_i[key] = eval(W_func_args_mutant_i[key])
                     else:
                         pass
 
