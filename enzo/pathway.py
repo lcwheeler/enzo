@@ -640,7 +640,7 @@ class PathwayFlex(object):
         self.main_model = te.loada(model_string)
         self.name = name
 
-    def evolve(self, params, W_func, W_func_args, optimum, optimum_tolerance = 0.01, iterations=10000, stop=True, MCA=True):
+    def evolve(self, params, W_func, W_func_args, optimum, optimum_tolerance = 0.1, iterations=10000, stop=True, MCA=True):
 
         """Function to sample the parameter space of the model one parameter at a time and evolve toward a 
         user defined fitness optimum. Fixation probabilities are calculated assuming stabilizing 
@@ -671,7 +671,6 @@ class PathwayFlex(object):
 
         # Store W_func and W_func_args as attributes. Used downstream to calculate fitness. 
         self.W_func = W_func
-    
         self.W_func_args_current = W_func_args["current"]
         self.W_func_args_mutant = W_func_args["mutant"]
 
@@ -683,20 +682,21 @@ class PathwayFlex(object):
             self.peak = peak
         else:
             peak = False
+            self.peak = peak
         
         
         # Initialize some lists and dictionaries to hold the simulation trajectories
         parameters = [] # Stores pertinent information for fixation events
         concentrations = [] # Stores concentration trajectories for fixations
         optima = {} # Stores pertinent information regarding final optimum state
-        bad_mutations = [] # catches mutations that violate steady state solution condition
-        
+        bad_mutations = {"SS_fail":[], "negative_SS_values":[]} # catches mutations that violate steady state solution condition
+ 
         # Build a dictionary to hold the fitness effects of each mutation (as list of effects for each parameter).
         fitness_effects = {}
         delta_effects = {}
         for key in params:
             fitness_effects[key] = []
-            delta_effects[key] = [] # Can also add a "bad" mutations logger to track numerical issues
+            delta_effects[key] = [] 
      
         main_model = self.main_model
         species = list(main_model.getFloatingSpeciesIds())
@@ -730,7 +730,7 @@ class PathwayFlex(object):
         
         # Generate a random set of mutations
         np.random.seed() # Need to store the seed used as attribute for reproducibility. 
-        self.mutations = np.random.gamma(0.8, 3, iterations+1)
+        self.mutations = np.random.gamma(0.8, 3, iterations+1) # self.mutations = self.mutation_func(**self.mutation_func_args)
         mutations = self.mutations
         
         IDs = np.random.choice(params, iterations+1)
@@ -765,13 +765,12 @@ class PathwayFlex(object):
             try:
                 SS_values_current = model.getSteadyStateValues()
                 SS_values_current = np.array(SS_values_current)
-                #print(np.sum(SS_values_current))
 
             except RuntimeError as e:
                 model.setValue(id=self.last_ID, value=self.last_val)
                 model.reset()
                 print(i, e)
-                continue #Should add a call to append to the "bad" mutations catcher here
+                continue 
 
             # Evaluate the arguments for the user-defined fitness function for current state. 
             for key in self.W_func_args_current.keys():
@@ -817,6 +816,7 @@ class PathwayFlex(object):
             except RuntimeError: 
                 model.setValue(id=ID, value=val)
                 model.reset()
+                bad_mutations["SS_fail"].append({"ID": ID, "value": value})
                 continue     
 
             # Add the results and the param values to their respective DataFrames if they satisfy criteria
@@ -852,8 +852,8 @@ class PathwayFlex(object):
                 # Check if the mutant fitness is improved over previous state and calculate fixation 
                 # probability accordingly. Discard neutral and deleterious mutations (because Pfix ~ 0). 
                 if W >= W_current: 
-
-                    P = (1-np.exp(-s))
+                    # Should make the Pfix_func flexible argument. Maybe make it be a function of s and other args? 
+                    P = (1-np.exp(-s)) # P = Pfix_func(**self.Pfix_func_args)
                     f = np.random.choice(fixation_choices, p = [P, 1-P])
 
                     if f == 0:
@@ -878,8 +878,9 @@ class PathwayFlex(object):
 
                                 if stop == True: 
                                     break 
-
+                    
                     else:
+                        print("DID NOT FIX")
                         model.setValue(id=ID, value=val)
                         model.reset()
 
@@ -890,7 +891,7 @@ class PathwayFlex(object):
             else: # Append to the "bad" mutations catcher here if steady state condition is violated
                 model.setValue(id=ID, value=val)
                 model.reset()
-                bad_mutations.append({"ID": ID, "value": value, "delta":delta})
+                bad_mutations["negative_SS_values"].append({"ID": ID, "value": value, "delta":delta})
                 continue 
                 
         # Store the concentrations from each step as a DataFrame
