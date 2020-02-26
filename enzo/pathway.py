@@ -697,8 +697,7 @@ class PathwayFlex(object):
 
         # Check to make sure that the size/length of mutations argument if greater than number of iterations
         if "size" in list(self.mutation_func_args.keys()):
-            size_test = eval(self.mutation_func_args["size"])
-            if size_test < iterations:
+            if self.mutation_func_args["size"] < iterations:
                 print("'size' argument of mutation_func must be greater than number of iterations.")
             else:
                 pass
