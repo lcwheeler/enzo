@@ -640,7 +640,7 @@ class PathwayFlex(object):
         self.main_model = te.loada(model_string)
         self.name = name
 
-    def evolve(self, params, W_func, W_func_args, optimum, optimum_tolerance = 0.01, iterations=10000, stop=True, MCA="True"):
+    def evolve(self, params, W_func, W_func_args, optimum, optimum_tolerance = 0.01, iterations=10000, stop=True, MCA=True):
 
         """Function to sample the parameter space of the model one parameter at a time and evolve toward a 
         user defined fitness optimum. Fixation probabilities are calculated assuming stabilizing 
@@ -669,34 +669,18 @@ class PathwayFlex(object):
             
         """
 
-        # Initialize blank version of SS_values_current and SS_values
-        SS_values_current = [i for i in range(0,14)] # These either need to moved or initialized with the appropriate length/number of entries
-        SS_values = [i for i in range(0,14)]
-
-        # Store W_func and W_func_args as attributes. 
-        # Then evaluate the user-input W_func_args dict() to get usable argument sets
+        # Store W_func and W_func_args as attributes. Used downstream to calculate fitness. 
         self.W_func = W_func
     
         self.W_func_args_current = W_func_args["current"]
         self.W_func_args_mutant = W_func_args["mutant"]
 
-        for key in self.W_func_args_current.keys():
-            if type(self.W_func_args_current[key]) == str or type(self.W_func_args_current[key]) == bytes or type(self.W_func_args_current[key]) == object:
-                self.W_func_args_current[key] = eval(self.W_func_args_current[key])
-            else:
-                pass
-
-        for key in self.W_func_args_mutant.keys():
-            if type(self.W_func_args_mutant[key]) == str or type(self.W_func_args_mutant[key]) == bytes or type(self.W_func_args_mutant[key]) == object:
-                self.W_func_args_mutant[key] = eval(self.W_func_args_mutant[key])
-            else:
-                pass
 
         # Determine if there is an argument called 'optimum' in W_func, to ask whether to use optimum tolerance
         if "optimum" in list(self.W_func.__code__.co_varnames):
             peak = True
             self.optimum = self.W_func_args_current["optimum"]
-
+            self.peak = peak
         else:
             peak = False
         
@@ -764,6 +748,7 @@ class PathwayFlex(object):
 
         # Iterate over generations of selection on steady state concentrations
         for i in range(iterations):
+
             model.reset()
             
             # Add 1 to the arrival time counter
@@ -779,12 +764,20 @@ class PathwayFlex(object):
             try:
                 SS_values_current = model.getSteadyStateValues()
                 SS_values_current = np.array(SS_values_current)
-                
+                #print(np.sum(SS_values_current))
+
             except RuntimeError as e:
                 model.setValue(id=self.last_ID, value=self.last_val)
                 model.reset()
                 print(i, e)
                 continue #Should add a call to append to the "bad" mutations catcher here
+
+            # Evaluate the arguments for the user-defined fitness function for current state. 
+            for key in self.W_func_args_current.keys():
+                if type(self.W_func_args_current[key]) == str or type(self.W_func_args_current[key]) == bytes or type(self.W_func_args_current[key]) == object:
+                    self.W_func_args_current[key] = eval(self.W_func_args_current[key]) 
+                else:
+                    pass
 
 
             # Use the user-input fitness function to calculate current fitness
@@ -796,7 +789,7 @@ class PathwayFlex(object):
                 W_current = W_func(**self.W_func_args_current) 
 
             else:
-                print("'opt_metric' is missing from your W_func_args input!'") 
+                print("'opt_metric' is missing from your W_func_args input!") 
             
             # Choose a random parameter from the model and find the current value
             ID = IDs[i]
@@ -828,13 +821,13 @@ class PathwayFlex(object):
             # Add the results and the param values to their respective DataFrames if they satisfy criteria
             if all(i > 0 for i in SS_values):
 
-                # This allows selection on a ratio of any set of floating species to any other set of floating species
-                #metric_1 = np.sum(SS_values[self.numerator_indexes])/np.sum(SS_values[self.denominator_indexes])  
-                #metric_2 = np.sum(SS_values)/total
+                # Evaluate the arguments for the user-defined fitness function for mutant state. 
+                for key in self.W_func_args_mutant.keys():
+                    if type(self.W_func_args_mutant[key]) == str or type(self.W_func_args_mutant[key]) == bytes or type(self.W_func_args_mutant[key]) == object:
+                        self.W_func_args_mutant[key] = eval(self.W_func_args_mutant[key])
+                    else:
+                        pass
 
-                
-                # Calculate the mutant fitness, relative fitness, and selection coefficient (s)
-                #W = np.exp(-1*(metric_1 - optimum1)**2) * np.exp(-1*(metric_2 - constraint)**2)
 
                 # Use the user-input fitness function to calculate the mutant fitness with evaluate kwargs
                 # Check to see if the function contains an "opt_metric" variable
@@ -845,7 +838,7 @@ class PathwayFlex(object):
                     W = W_func(**self.W_func_args_mutant)
 
                 else:
-                    print("'opt_metric' is missing from your W_func_args input!'") 
+                    print("'opt_metric' is missing from your W_func_args input!") 
 
                 
                 # Keep track of fitness effects at each step (positive = good, negative = bad). 
@@ -871,7 +864,7 @@ class PathwayFlex(object):
 
                         # Store the parameter ID, value, selection coefficient, delta mut. effect size, metric_1, fitness,
                         # step number, and arrival time of mutation in a dict, add to the parameters attribute (list of dicts).
-                        parameters.append({"ID": ID, "value": value, "s":s, "P_fix":P, "delta":delta, "arrival":arrival, "distance":metric_1, "fitness":W, "step":step_counter}) 
+                        parameters.append({"ID": ID, "value": value, "s":s, "P_fix":P, "delta":delta, "arrival":arrival, "fitness":W, "step":step_counter}) 
 
                         # reset the arrival time to 0 to begin count again until next fixation event
                         arrival = 0
@@ -916,7 +909,7 @@ class PathwayFlex(object):
         # Builds a pd.DataFrame of the control coefficient and elasticity matrices. 
         # If it fails for some numerical (or other) reason, just ignores and saves the error message instead.
         # These can be checked later to discard any models that result in errors. 
-        if MCA == "True":
+        if MCA == True:
             try:
                 self.cc_matrix = model.getScaledConcentrationControlCoefficientMatrix()
                 self.cc_matrix = pd.DataFrame(self.cc_matrix, columns=[name for name in self.cc_matrix.colnames], index=[name for name in self.cc_matrix.rownames])
