@@ -896,7 +896,7 @@ class PathwayFlex(object):
 
                     # Make the Pfix_func flexible argument. Maybe make it be a function of s and other args? 
                     #P = (1-np.exp(-s)) 
-                    P = self.Pfix_func(**self.Pfix_func_args)
+                    P = self.Pfix_func(**Pfix_func_args_i)
 
                     # Use random choice to sample fixation True(0)/False(1) based on calculated probability
                     f = np.random.choice(fixation_choices, p = [P, 1-P])
