@@ -785,10 +785,10 @@ class PathwayFlex(object):
             # Use the user-input fitness function to calculate current fitness
             # Check for the "opt_metric" variable in fitness function to decide next step
             if "opt_metric" in list(self.W_func.__code__.co_varnames):
-                W_current, opt_metric_current = W_func(**self.W_func_args_current)
+                W_current, opt_metric_current = W_func(**W_func_args_current_i)
 
             elif "opt_metric" not in list(self.W_func.__code__.co_varnames):
-                W_current = W_func(**self.W_func_args_current) 
+                W_current = W_func(**W_func_args_current_i) 
 
             else:
                 print("'opt_metric' is missing from your W_func_args input!") 
@@ -838,10 +838,10 @@ class PathwayFlex(object):
                 # Use the user-input fitness function to calculate the mutant fitness with evaluate kwargs
                 # Check to see if the function contains an "opt_metric" variable
                 if "opt_metric" in list(self.W_func.__code__.co_varnames):
-                    W, opt_metric = W_func(**self.W_func_args_mutant)
+                    W, opt_metric = W_func(**W_func_args_mutant_i)
                     print(W, opt_metric)
                 elif "opt_metric" not in list(self.W_func.__code__.co_varnames):
-                    W = W_func(**self.W_func_args_mutant)
+                    W = W_func(**W_func_args_mutant_i)
                 else:
                     print("'opt_metric' is missing from your W_func_args input!") 
 
