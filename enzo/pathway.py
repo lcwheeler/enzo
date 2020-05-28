@@ -670,7 +670,7 @@ class PathwayFlex(object):
         iterations: int  
             number of iterations to perform (max length of trajectory)
         stop: bool
-            Whether or not to stop simulation when optimum is reached
+            Whether or not to stop simulation when optimum is reached within tolerance
         MCA: bool
             Whether or not to calculate and store the MCA matrices
             
@@ -681,12 +681,20 @@ class PathwayFlex(object):
         self.W_func_args_current = W_func_args["current"]
         self.W_func_args_mutant = W_func_args["mutant"]
 
-        # Determine if there is an argument called 'optimum' in W_func, to ask whether to use optimum tolerance
-        if "optimum" in list(self.W_func.__code__.co_varnames):
+        # Determine if there is are arguments called 'optimum' and 'opt_metric' in W_func, to ask whether to use optimum tolerance
+        # The downstream usage of the 'optimum' arg will also require the 'opt_metric' arg. 
+        if "optimum" in list(self.W_func.__code__.co_varnames) and "opt_metric" in list(self.W_func.__code__.co_varnames):
             peak = True
             self.optimum = self.W_func_args_current["optimum"]
             self.peak = peak
             self.optimum_tolerance = optimum_tolerance
+
+        elif "optimum" in list(self.W_func.__code__.co_varnames) and "opt_metric" not in list(self.W_func.__code__.co_varnames):
+            print("You are trying to use the optimum variable without an opt_metric")
+
+        elif "optimum" not in list(self.W_func.__code__.co_varnames) and "opt_metric" in list(self.W_func.__code__.co_varnames):
+            print("You are trying to use the optimum variable without an opt_metric")
+
         else:
             peak = False
             self.peak = peak
@@ -817,11 +825,8 @@ class PathwayFlex(object):
             if "opt_metric" in list(self.W_func.__code__.co_varnames):
                 W_current, opt_metric_current = W_func(**W_func_args_current_i)
 
-            elif "opt_metric" not in list(self.W_func.__code__.co_varnames):
-                W_current = W_func(**W_func_args_current_i) 
-
             else:
-                print("'opt_metric' is missing from your W_func_args input!") 
+                W_current = W_func(**W_func_args_current_i) 
             
             # Choose a random parameter from the model and find the current value
             ID = IDs[i]
@@ -852,7 +857,7 @@ class PathwayFlex(object):
                 continue     
 
             # Add the results and the param values to their respective DataFrames if they satisfy criteria
-            if all(i > 0 for i in SS_values):
+            if all(i > 0 for i in SS_values): # This checks to make sure the SS solution is legitimate
 
                 # Evaluate the arguments for the user-defined fitness function for mutant state. 
                 # Do the evaluation in a copy of the W_func_args_mutant attribute to keep attr as reference
@@ -866,17 +871,15 @@ class PathwayFlex(object):
 
 
                 # Use the user-input fitness function to calculate the mutant fitness with evaluate kwargs
-                # Check to see if the function contains an "opt_metric" variable
+                # Check to see if the function contains an "opt_metric" variable, if so return it, otherwise return W only.
                 if "opt_metric" in list(self.W_func.__code__.co_varnames):
                     W, opt_metric = W_func(**W_func_args_mutant_i)
-                elif "opt_metric" not in list(self.W_func.__code__.co_varnames):
-                    W = W_func(**W_func_args_mutant_i)
                 else:
-                    print("'opt_metric' is missing from your W_func_args input!") 
+                    W = W_func(**W_func_args_mutant_i) 
 
                 
                 # Keep track of fitness effects at each step (positive = good, negative = bad). 
-                # This is just a delta_W between previous state and new mutant state
+                # This is just a delta_W between previous state and new mutant state.
                 s = W - W_current
 
                 fitness_effects[ID].append(s)
@@ -916,7 +919,8 @@ class PathwayFlex(object):
                         arrival = 0
 
                         # Check to see if the steady state is within tolerance of the optimum and save if it is.
-                        if peak == True:
+                        # But only do this if self.peak==True, indicating that "optimum" and "opt_metric" args exist. 
+                        if self.peak == True:
 
                             if opt_metric > (self.optimum - self.optimum*self.optimum_tolerance) and opt_metric < (self.optimum + self.optimum*self.optimum_tolerance):
                                 model.reset()
