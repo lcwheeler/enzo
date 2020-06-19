@@ -217,7 +217,7 @@ class PathwaySetFlex(object):
         
     def generate(self, model_string, num_pathways):
         """Generate a set of Pathway() objects."""
-        
+        # To make this accept a non-tellurium pathway model object would need to remove model_string dependence
         if bool(self.pathway_set) == False:
             ref_model = PathwayFlex(model_string, name = "ref")
 

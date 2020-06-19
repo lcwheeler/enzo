@@ -634,7 +634,7 @@ class PathwayFlex(object):
             a string to name the object instance
 
         """
-        
+        # Would need to remove model_string dependence here to allow for non-tellurium models
         # Initialize some important object attributes
         self.model_string = model_string
         self.main_model = te.loada(model_string)
@@ -733,7 +733,7 @@ class PathwayFlex(object):
         species = list(main_model.getFloatingSpeciesIds())
         
         # Reset the main reference model (start) and make a copy to pass into the iterations
-        main_model.resetToOrigin()
+        main_model.resetToOrigin() # One of many points that would need to be synergized with a non-telluriume custom model
         model = copy(main_model)
 
         # Calculate and append the initial steady state concentration data to the concentrations list
@@ -837,7 +837,7 @@ class PathwayFlex(object):
             self.last_ID = deepcopy(ID)
             
             # Use random parameter adjustments about the starting value (from pre-assembled lists)
-            value = val * mutations[i]
+            value = val * mutations[i] # Changing this bit would allow the mutations to be assigned directly rather than be shifts; val * mutations[i], could make this another function i.e. "assign_mutations" 
             model.setValue(id=ID, value=value)
             delta = (value - val)/val # for book-keeping
 
