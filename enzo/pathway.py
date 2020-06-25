@@ -666,7 +666,7 @@ class PathwayFlex(object):
         Pfix_func_args: dict()
             Dictionary containing arguments for Pfix_func
         direct_assign_mutations: bool
-            Whether or not to directly assign values from the set of mutations (vs. multiplication, etc)
+            Whether or not to directly assign values from the set of mutations (vs. multiplication, addition, etc)
         optimum_tolerance: float 
             fractional tolerance on optimum value (only used if optimum is defined)
         iterations: int  
@@ -722,6 +722,7 @@ class PathwayFlex(object):
         # Initialize some lists and dictionaries to hold the simulation trajectories
         parameters = [] # Stores pertinent information for fixation events
         concentrations = [] # Stores concentration trajectories for fixations
+        #amounts = [] # Stores amount trajectories for fixations
         optima = {} # Stores pertinent information regarding final optimum state
         bad_mutations = {"SS_fail":[], "negative_SS_values":[]} # catches mutations that violate steady state solution condition
  
@@ -745,8 +746,10 @@ class PathwayFlex(object):
         try:
             main_model.getSteadyStateSolver().relative_tolerance = 1e-25
             SS_selections_main = main_model.steadyStateSelections = species
-            SS_values_main = main_model.getSteadyStateValues()
+            SS_values_main = main_model.getSteadyStateValues() 
+            #SS_amounts_main = main_model.getFloatingSpeciesAmounts()
             concentrations.append(SS_values_main)
+            #amounts.append(SS_amounts_main)
             main_model.resetToOrigin()
 
         except RuntimeError as err:
@@ -805,7 +808,11 @@ class PathwayFlex(object):
             # Try to solve the current model steady state and reset to previous state if it fails
             try:
                 SS_values_current = model.getSteadyStateValues()
-                SS_values_current = np.array(SS_values_current)
+                SS_values_current = np.array(SS_values_current) 
+
+                #Add SS_amounts_current for Wfunc options that will use it
+                SS_amounts_current = model.getFloatingSpeciesAmounts()
+                SS_amounts_current = np.array(SS_amounts_current)
 
             except RuntimeError as e:
                 model.setValue(id=self.last_ID, value=self.last_val)
@@ -868,9 +875,13 @@ class PathwayFlex(object):
 
             # If the steady state solver fails, just reset to previous state and skip the iteration
             try:
-                SS_values = model.getSteadyStateValues()
+                SS_values = model.getSteadyStateValues() 
                 SS_values = list(SS_values)
-                SS_values = np.array(SS_values)
+                SS_values = np.array(SS_values) 
+
+                #Add SS_amounts for Wfunc options that will use it
+                SS_amounts = model.getFloatingSpeciesAmounts()
+                SS_amounts = np.array(SS_amounts)
 
             except RuntimeError: 
                 model.setValue(id=ID, value=val)
@@ -931,7 +942,8 @@ class PathwayFlex(object):
                         step_counter =+ 1
 
                         # Store the steady state concentrations at this step.
-                        concentrations.append(SS_values)
+                        concentrations.append(SS_values) 
+                        #amounts.append(SS_amounts) #Also store SS_amounts? 
 
                         # Store the parameter ID, value, selection coefficient, delta mut. effect size, metric_1, fitness,
                         # step number, and arrival time of mutation in a dict, add to the parameters attribute (list of dicts).
@@ -1005,21 +1017,38 @@ class PathwayFlex(object):
         self.delta_effects = delta_effects
         self.bad_mutations = bad_mutations
 
-    def plot_ss(self):
+    def plot_ss(self, amounts=False):
         """Return a plot of the steady state concentrations for the final evolved model."""
         
-        model = te.loads(self.model)
-        model.reset()
-        SS_selections = model.steadyStateSelections = list(model.getFloatingSpeciesIds()) 
-        SS_values = model.getSteadyStateValues()
-        SS_values = np.array(SS_values)
+        if amounts == False:
+            model = te.loads(self.model)
+            model.reset()
+            SS_selections = model.steadyStateSelections = list(model.getFloatingSpeciesIds()) 
+            SS_values = model.getSteadyStateValues()
+            SS_values = np.array(SS_values)
 
-        sns.barplot(SS_selections, SS_values, color="lightgray")
-        plt.xticks(rotation=90)
-        plt.gcf().subplots_adjust(bottom=0.15)
-        plt.title("Steady-state (irreversible, competition)")
-        plt.ylabel("Concentration (mM)")
-        plt.xlabel("Metabolite name");
+            sns.barplot(SS_selections, SS_values, color="lightgray")
+            plt.xticks(rotation=90)
+            plt.gcf().subplots_adjust(bottom=0.15)
+            plt.title("Steady-state concentrations")
+            plt.ylabel("Concentration (M)")
+            plt.xlabel("Metabolite name");
+            print("The total concentration is " + str(np.sum(SS_values)) + "arbitrary units")
 
-        print("The total concentration is " + str(np.sum(SS_values)) + "mM")
+        else:
+            model = te.loads(self.model)
+            model.reset()
+            SS_selections = model.steadyStateSelections = list(model.getFloatingSpeciesIds()) 
+            SS_amounts = model.getSteadyStateValues()
+            SS_amounts = np.array(SS_amounts) 
+
+            sns.barplot(SS_selections, SS_amounts, color="lightgray")
+            plt.xticks(rotation=90)
+            plt.gcf().subplots_adjust(bottom=0.15)
+            plt.title("Steady-state amounts")
+            plt.ylabel("Amount (mol)")
+            plt.xlabel("Metabolite name");
+            print("The total amount is " + str(np.sum(SS_amounts)) + "arbitrary units")
+
+        
 
