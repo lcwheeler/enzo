@@ -639,7 +639,6 @@ class PathwayFlex(object):
         self.model_string = model_string
         self.main_model = te.loada(model_string)
         self.name = name
-        self.model_compartments = list(main_model.getCompartmentIds())
 
     def evolve(self, params, W_func, W_func_args, mutation_func, mutation_func_args, Pfix_func, Pfix_func_args, direct_assign_mutations, optimum_tolerance = 0.1, iterations=10000, stop=True, MCA=True):
 
@@ -735,7 +734,7 @@ class PathwayFlex(object):
      
         main_model = self.main_model
         species = list(main_model.getFloatingSpeciesIds())
-        #self.model_compartments = list(main_model.getCompartmentIds())
+        self.model_compartments = list(main_model.getCompartmentIds())
 
         # Reset the main reference model (start) and make a copy to pass into the iterations
         main_model.resetToOrigin() # One of many points that would need to be synergized with a non-telluriume custom model
