@@ -1031,24 +1031,25 @@ class PathwayFlex(object):
             plt.xticks(rotation=90)
             plt.gcf().subplots_adjust(bottom=0.15)
             plt.title("Steady-state concentrations")
-            plt.ylabel("Concentration (M)")
+            plt.ylabel("Concentration (arbitrary units)")
             plt.xlabel("Metabolite name");
-            print("The total concentration is " + str(np.sum(SS_values)) + "arbitrary units")
+            print("The total concentration is " + str(np.sum(SS_values)) + " arbitrary units")
 
         else:
             model = te.loads(self.model)
             model.reset()
             SS_selections = model.steadyStateSelections = list(model.getFloatingSpeciesIds()) 
-            SS_amounts = model.getSteadyStateValues()
+            model.steadyState()
+            SS_amounts = model.getFloatingSpeciesAmounts()
             SS_amounts = np.array(SS_amounts) 
 
             sns.barplot(SS_selections, SS_amounts, color="lightgray")
             plt.xticks(rotation=90)
             plt.gcf().subplots_adjust(bottom=0.15)
             plt.title("Steady-state amounts")
-            plt.ylabel("Amount (mol)")
+            plt.ylabel("Amount (arbitrary units)")
             plt.xlabel("Metabolite name");
-            print("The total amount is " + str(np.sum(SS_amounts)) + "arbitrary units")
+            print("The total amount is " + str(np.sum(SS_amounts)) + " arbitrary units")
 
         
 
