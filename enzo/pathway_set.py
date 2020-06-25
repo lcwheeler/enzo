@@ -204,7 +204,7 @@ class PathwaySetMod(object):
 
 
 #######################################################################################################
-####### Modified version of the PathwaySet object that corresponds to the PathwayFlex object with general fitness func.
+####### Modified version of the PathwaySet object that corresponds to the PathwayFlex object with customizable fitness func.
 
 class PathwaySetFlex(object):
     """Object class that holds a set of Pathway() objects, with methods to access data from all objects."""
@@ -227,7 +227,7 @@ class PathwaySetFlex(object):
         else:
             raise Exception('A pathway set has already been generated.')
             
-    def evolve(self, params, W_func, W_func_args, mutation_func, mutation_func_args, Pfix_func, Pfix_func_args, optimum_tolerance, iterations, stop, MCA):
+    def evolve(self, params, W_func, W_func_args, mutation_func, mutation_func_args, Pfix_func, Pfix_func_args, direct_assign_mutations, optimum_tolerance, iterations, stop, MCA):
 
         """Evolve all of the pathway objects stored in pathway_set. Using the built-in evolve function in Pathway.
 
@@ -258,7 +258,7 @@ class PathwaySetFlex(object):
             self.params = params
 
             for i in range(len(self.pathway_set.keys())):
-                self.pathway_set[i].evolve(params, W_func, W_func_args, mutation_func, mutation_func_args, Pfix_func, Pfix_func_args, optimum_tolerance, iterations, stop, MCA)
+                self.pathway_set[i].evolve(params, W_func, W_func_args, mutation_func, mutation_func_args, Pfix_func, Pfix_func_args, direct_assign_mutations, optimum_tolerance, iterations, stop, MCA)
             
             self.evolved = True
             

@@ -639,8 +639,9 @@ class PathwayFlex(object):
         self.model_string = model_string
         self.main_model = te.loada(model_string)
         self.name = name
+        self.model_compartments = list(main_model.getCompartmentIds())
 
-    def evolve(self, params, W_func, W_func_args, mutation_func, mutation_func_args, Pfix_func, Pfix_func_args, optimum_tolerance = 0.1, iterations=10000, stop=True, MCA=True):
+    def evolve(self, params, W_func, W_func_args, mutation_func, mutation_func_args, Pfix_func, Pfix_func_args, direct_assign_mutations, optimum_tolerance = 0.1, iterations=10000, stop=True, MCA=True):
 
         """Function to sample the parameter space of the model one parameter at a time and evolve toward a 
         user defined fitness function, mutational sampling process. Fixation probabilities are calculated according to user-input custom fixation probability function.
@@ -665,7 +666,9 @@ class PathwayFlex(object):
             Custom fixation probability function 
         Pfix_func_args: dict()
             Dictionary containing arguments for Pfix_func
-        optimum_tolerance: float
+        direct_assign_mutations: bool
+            Whether or not to directly assign values from the set of mutations (vs. multiplication, etc)
+        optimum_tolerance: float 
             fractional tolerance on optimum value (only used if optimum is defined)
         iterations: int  
             number of iterations to perform (max length of trajectory)
@@ -675,7 +678,7 @@ class PathwayFlex(object):
             Whether or not to calculate and store the MCA matrices
             
         """
-
+        # Should pass the optimum tolerance as an argument for the fitness function instead
         # Store W_func and W_func_args as attributes. Used downstream to calculate fitness. 
         self.W_func = W_func
         self.W_func_args_current = W_func_args["current"]
@@ -702,6 +705,7 @@ class PathwayFlex(object):
         # Store mutation_func and mutation_func_args as attributes. Used to generate set of mutations.
         self.mutation_func = mutation_func
         self.mutation_func_args = mutation_func_args
+        self.direct_assign_mutations = direct_assign_mutations
 
         # Check to make sure that the size/length of mutations argument if greater than number of iterations
         if "size" in list(self.mutation_func_args.keys()):
@@ -731,7 +735,8 @@ class PathwayFlex(object):
      
         main_model = self.main_model
         species = list(main_model.getFloatingSpeciesIds())
-        
+        #self.model_compartments = list(main_model.getCompartmentIds())
+
         # Reset the main reference model (start) and make a copy to pass into the iterations
         main_model.resetToOrigin() # One of many points that would need to be synergized with a non-telluriume custom model
         model = copy(main_model)
@@ -767,7 +772,6 @@ class PathwayFlex(object):
 
         # Generate a random set of mutations using user-defined mutation function
         np.random.seed() # Need to store the seed used as attribute for reproducibility. 
-        #self.mutations = np.random.gamma(0.8, 3, iterations+1) 
         self.mutations = self.mutation_func(**self.mutation_func_args)
         mutations = self.mutations
         
@@ -837,9 +841,28 @@ class PathwayFlex(object):
             self.last_ID = deepcopy(ID)
             
             # Use random parameter adjustments about the starting value (from pre-assembled lists)
-            value = val * mutations[i] # Changing this bit would allow the mutations to be assigned directly rather than be shifts; val * mutations[i], could make this another function i.e. "assign_mutations" 
-            model.setValue(id=ID, value=value)
-            delta = (value - val)/val # for book-keeping
+            #value = val * mutations[i] # Changing this bit would allow the mutations to be assigned directly rather than be shifts; val * mutations[i], could make this another function i.e. "assign_mutations" 
+            #model.setValue(id=ID, value=value)
+            #delta = (value - val)/val # for book-keeping
+
+            if self.direct_assign_mutations == True:
+                if ID in self.model_compartments:
+                    value = mutations[i]
+                    model.__setattr__(ID, value)
+                    delta = (value - val)/val
+                else:
+                    value = mutations[i]
+                    model.setValue(id=ID, value=value)
+                    delta = (value - val)/val
+            else:
+                if ID in self.compartments:
+                    value = val * mutations[i]
+                    model.__setattr__(ID, value)
+                    delta = (value - val)/val
+                else:
+                    value = val * mutations[i]
+                    model.setValue(id=ID, value=value)
+                    delta = (value - val)/val
 
             # Calculate the steady state concentrations of species in pathway
             model.getSteadyStateSolver().relative_tolerance = 1e-25
