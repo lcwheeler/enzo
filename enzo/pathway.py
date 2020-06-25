@@ -851,6 +851,8 @@ class PathwayFlex(object):
             #model.setValue(id=ID, value=value)
             #delta = (value - val)/val # for book-keeping
 
+            # These conditionals check to see if mutations are being directly assigned as parameter values and whether they affect
+            # reaction parameters or compartment volumes, since comp. vol. can't be modified in the same way. 
             if self.direct_assign_mutations == True:
                 if ID in self.model_compartments:
                     value = mutations[i]
@@ -860,7 +862,7 @@ class PathwayFlex(object):
                     value = mutations[i]
                     model.setValue(id=ID, value=value)
                     delta = (value - val)/val
-            else:
+            else: # This will apply the mutation values as a multiplier to current param value rather than directly assign them. 
                 if ID in self.compartments:
                     value = val * mutations[i]
                     model.__setattr__(ID, value)
