@@ -666,7 +666,7 @@ class PathwayFlex(object):
         Pfix_func_args: dict()
             Dictionary containing arguments for Pfix_func
         direct_assign_mutations: bool
-            Whether or not to directly assign values from the set of mutations (vs. multiplication, addition, etc)
+            Whether or not to directly assign values from the set of mutations (vs. multiplication of current value)
         optimum_tolerance: float 
             fractional tolerance on optimum value (only used if optimum is defined)
         iterations: int  
@@ -729,9 +729,11 @@ class PathwayFlex(object):
         # Build a dictionary to hold the fitness effects of each mutation (as list of effects for each parameter).
         fitness_effects = {}
         delta_effects = {}
+        realized_mutations = {}
         for key in params:
             fitness_effects[key] = []
             delta_effects[key] = [] 
+            realized_mutations[key] = []
      
         main_model = self.main_model
         species = list(main_model.getFloatingSpeciesIds())
@@ -919,6 +921,7 @@ class PathwayFlex(object):
 
                 fitness_effects[ID].append(s)
                 delta_effects[ID].append(delta)
+                realized_mutations[ID].append(delta)
                 
                 # Check if the mutant fitness is improved over previous state and calculate fixation 
                 # probability accordingly. Discard neutral and deleterious mutations (because Pfix ~ 0). 
@@ -1017,7 +1020,10 @@ class PathwayFlex(object):
         self.optima = optima
         self.fitness_effects = fitness_effects
         self.delta_effects = delta_effects
+        self.realized_mutations = realized_mutations
         self.bad_mutations = bad_mutations
+        # Nullify the large mutations data structure to save space
+        self.mutations = None 
 
     def plot_ss(self, amounts=False):
         """Return a plot of the steady state concentrations for the final evolved model."""
