@@ -658,7 +658,7 @@ class PathwayFlex(object):
         W_func_args: dict()
             Nested dictionary with "current" and "mutant" args for W_func (must reference 'SS_values_current' and 'SS_values' variables)
         mutation_func: function
-            Custom mutation process function  (requires 'size' argument)
+            Custom mutation process function  (requires 'size' argument), must return dict {0:{ID1:value1, ID2:value2...}, 1:{ID1:value1, ID2:value2...}} that maps iterations to a dict of mutations for each param ID
         mutation_func_args: dict()
             Dictionary containing arguments for mutation_func
         Pfix_func: function
@@ -713,7 +713,7 @@ class PathwayFlex(object):
             else:
                 pass
         else:
-            print("Your mutation_func requires a 'size' argument to ensure proper length of muations list")
+            print("Your mutation_func requires a 'size' argument to ensure proper length of mutations list")
 
         # Store Pfix_func and Pfix_func_args as attributes. Used downstream to calculate fixation prob.
         self.Pfix_func = Pfix_func
@@ -777,6 +777,7 @@ class PathwayFlex(object):
         self.mutations = self.mutation_func(**self.mutation_func_args)
         mutations = self.mutations
         
+        # Randomly draw a list of parameter IDs for mutations longer than total iterations
         IDs = np.random.choice(params, iterations+1)
         
         # Initialize tracking variables so the model can be reset in the event of error
@@ -846,29 +847,28 @@ class PathwayFlex(object):
             self.last_val = deepcopy(val)
             self.last_ID = deepcopy(ID)
             
-            # Use random parameter adjustments about the starting value (from pre-assembled lists)
-            #value = val * mutations[i] # Changing this bit would allow the mutations to be assigned directly rather than be shifts; val * mutations[i], could make this another function i.e. "assign_mutations" 
-            #model.setValue(id=ID, value=value)
-            #delta = (value - val)/val # for book-keeping
+            # Use random parameter adjustments about the starting value or directly assign from pre-assemlbed list of mut. values
 
             # These conditionals check to see if mutations are being directly assigned as parameter values and whether they affect
             # reaction parameters or compartment volumes, since comp. vol. can't be modified in the same way. 
+            # The new version of mutations will be a nested dict with a key for each iteration and a dict containing all IDs and 
+            # the possible parameter value mutations for each ID
             if self.direct_assign_mutations == True:
                 if ID in self.model_compartments:
-                    value = mutations[i]
+                    value = mutations[i][ID] # mutations[i][ID] -> {0:{ID1:value1, ID2:value2...}, 1:{ID1:value1, ID2:value2...}}
                     model.__setattr__(ID, value)
                     delta = (value - val)/val
                 else:
-                    value = mutations[i]
+                    value = mutations[i][ID]
                     model.setValue(id=ID, value=value)
                     delta = (value - val)/val
             else: # This will apply the mutation values as a multiplier to current param value rather than directly assign them. 
                 if ID in self.compartments:
-                    value = val * mutations[i]
+                    value = val * mutations[i][ID]
                     model.__setattr__(ID, value)
                     delta = (value - val)/val
                 else:
-                    value = val * mutations[i]
+                    value = val * mutations[i][ID]
                     model.setValue(id=ID, value=value)
                     delta = (value - val)/val
 
