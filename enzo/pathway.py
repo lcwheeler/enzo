@@ -729,11 +729,11 @@ class PathwayFlex(object):
         # Build a dictionary to hold the fitness effects of each mutation (as list of effects for each parameter).
         fitness_effects = {}
         delta_effects = {}
-        #realized_mutations = {}
+        realized_mutations = {}
         for key in params:
             fitness_effects[key] = []
             delta_effects[key] = [] 
-            #realized_mutations[key] = []
+            realized_mutations[key] = []
      
         main_model = self.main_model
         species = list(main_model.getFloatingSpeciesIds())
@@ -794,6 +794,7 @@ class PathwayFlex(object):
         arrival = 0
         step_counter = 0
 
+        #print("Entering iteration phase")
         # Iterate over generations of selection on steady state concentrations
         for i in range(iterations):
 
@@ -865,7 +866,7 @@ class PathwayFlex(object):
                     model.setValue(id=ID, value=value)
                     delta = (value - val)/val
             else: # This will apply the mutation values as a multiplier to current param value rather than directly assign them. 
-                if ID in self.compartments:
+                if ID in self.model_compartments:
                     value = val * mutations[i][ID]
                     model.__setattr__(ID, value)
                     delta = (value - val)/val
@@ -921,7 +922,7 @@ class PathwayFlex(object):
 
                 fitness_effects[ID].append(s)
                 delta_effects[ID].append(delta)
-                #realized_mutations[ID].append(delta)
+                realized_mutations[ID].append(value)
                 
                 # Check if the mutant fitness is improved over previous state and calculate fixation 
                 # probability accordingly. Discard neutral and deleterious mutations (because Pfix ~ 0). 
@@ -1020,7 +1021,7 @@ class PathwayFlex(object):
         self.optima = optima
         self.fitness_effects = fitness_effects
         self.delta_effects = delta_effects
-        #self.realized_mutations = realized_mutations
+        self.realized_mutations = realized_mutations
         self.bad_mutations = bad_mutations
         # Nullify the large mutations data structure to save space
         self.mutations = None 
@@ -1058,6 +1059,4 @@ class PathwayFlex(object):
             plt.ylabel("Amount (arbitrary units)")
             plt.xlabel("Metabolite name");
             print("The total amount is " + str(np.sum(SS_amounts)) + " arbitrary units")
-
-        
 
