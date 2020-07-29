@@ -729,11 +729,11 @@ class PathwayFlex(object):
         # Build a dictionary to hold the fitness effects of each mutation (as list of effects for each parameter).
         fitness_effects = {}
         delta_effects = {}
-        realized_mutations = {}
+        #realized_mutations = {}
         for key in params:
             fitness_effects[key] = []
             delta_effects[key] = [] 
-            realized_mutations[key] = []
+            #realized_mutations[key] = []
      
         main_model = self.main_model
         species = list(main_model.getFloatingSpeciesIds())
@@ -853,7 +853,7 @@ class PathwayFlex(object):
 
             # These conditionals check to see if mutations are being directly assigned as parameter values and whether they affect
             # reaction parameters or compartment volumes, since comp. vol. can't be modified in the same way. 
-            # The new version of mutations will be a nested dict with a key for each iteration and a dict containing all IDs and 
+            # The new version of mutations is a nested dict with a key for each iteration and a dict containing all IDs and 
             # the possible parameter value mutations for each ID
             if self.direct_assign_mutations == True:
                 if ID in self.model_compartments:
@@ -921,7 +921,7 @@ class PathwayFlex(object):
 
                 fitness_effects[ID].append(s)
                 delta_effects[ID].append(delta)
-                realized_mutations[ID].append(delta)
+                #realized_mutations[ID].append(delta)
                 
                 # Check if the mutant fitness is improved over previous state and calculate fixation 
                 # probability accordingly. Discard neutral and deleterious mutations (because Pfix ~ 0). 
@@ -1020,7 +1020,7 @@ class PathwayFlex(object):
         self.optima = optima
         self.fitness_effects = fitness_effects
         self.delta_effects = delta_effects
-        self.realized_mutations = realized_mutations
+        #self.realized_mutations = realized_mutations
         self.bad_mutations = bad_mutations
         # Nullify the large mutations data structure to save space
         self.mutations = None 
