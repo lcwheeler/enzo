@@ -28,7 +28,7 @@ class PathwaySet(object):
             whether the object is pickled after evolution of each Pathway object
         """
 
-        self.running_pickle = running_pickle)
+        self.running_pickle = running_pickle
         
         if bool(self.pathway_set) == False:
             ref_model = Pathway(model_string, name = "ref")
@@ -148,7 +148,7 @@ class PathwaySetMod(object):
             whether the object is pickled after evolution of each PathwayFlex object
         """
 
-        self.running_pickle = running_pickle)
+        self.running_pickle = running_pickle
         
         if bool(self.pathway_set) == False:
             ref_model = PathwayMod(model_string, name = "ref")
