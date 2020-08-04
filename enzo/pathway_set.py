@@ -79,7 +79,7 @@ class PathwaySet(object):
                 # This will write out the PathwaySetFlex object as a pickle file after each iteration
                 # Need to convert te model object to sbml str for pickling and then convert back
                 if self.running_pickle == True:
-                    temp_model = copy(self.pathwayset[i].model)
+                    temp_model = copy(self.pathway_set[i].model)
                     self.pathway_set[i].model = self.pathway_set[i].model.getCurrentSBML()
                     pickle.dump(self, open(self.name+".p", "wb"))
                     self.pathway_set[i].model = temp_model
