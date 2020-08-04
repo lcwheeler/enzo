@@ -83,7 +83,8 @@ class Pathway(object):
 
         # Reset the main reference model (start) and make a copy to pass into the iterations
         main_model.resetToOrigin()
-        model = copy(main_model)
+        self.model = copy(main_model)
+        model=self.model
 
         # Calculate and append the initial steady state concentration data to the concentrations list
 

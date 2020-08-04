@@ -77,8 +77,13 @@ class PathwaySet(object):
                 self.pathway_set[i].evolve(params, optimum1, numerator_indexes, denominator_indexes, total, constraint, optimum_tolerance, iterations)
 
                 # This will write out the PathwaySetFlex object as a pickle file after each iteration
+                # Need to convert te model object to sbml str for pickling and then convert back
                 if self.running_pickle == True:
+                    temp_model = copy(self.pathwayset[i].model)
+                    self.pathway_set[i].model = self.pathway_set[i].model.getCurrentSBML()
                     pickle.dump(self, open(self.name+".p", "wb"))
+                    self.pathway_set[i].model = temp_model
+            
             
             self.evolved = True
             
@@ -310,8 +315,12 @@ class PathwaySetFlex(object):
                 self.pathway_set[i].evolve(params, W_func, W_func_args, mutation_func, mutation_func_args, Pfix_func, Pfix_func_args, direct_assign_mutations, optimum_tolerance, iterations, stop, MCA)
 
                 # This will write out the PathwaySetFlex object as a pickle file after each iteration
+                # Need to convert te model object to sbml str for pickling and then convert back
                 if self.running_pickle == True:
+                    temp_model = copy(self.pathwayset[i].model)
+                    self.pathway_set[i].model = self.pathway_set[i].model.getCurrentSBML()
                     pickle.dump(self, open(self.name+".p", "wb"))
+                    self.pathway_set[i].model = temp_model
             
             self.evolved = True
             
