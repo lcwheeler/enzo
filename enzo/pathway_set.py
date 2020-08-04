@@ -76,13 +76,9 @@ class PathwaySet(object):
             for i in range(len(self.pathway_set.keys())):
                 self.pathway_set[i].evolve(params, optimum1, numerator_indexes, denominator_indexes, total, constraint, optimum_tolerance, iterations)
 
-                # This will write out the PathwaySetFlex object as a pickle file after each iteration
-                # Need to convert te model object to sbml str for pickling and then convert back
+                # This will write out the PathwayFlex objects as pickle files after each iteration
                 if self.running_pickle == True:
-                    temp_model = copy(self.pathway_set[i].model)
-                    self.pathway_set[i].model = self.pathway_set[i].model.getCurrentSBML()
-                    pickle.dump(self, open(self.name+".p", "wb"))
-                    self.pathway_set[i].model = temp_model
+                    pickle.dump(self.pathway_set[i], open(self.pathway_set[i].name+".p", "wb"))
             
             
             self.evolved = True
@@ -202,7 +198,7 @@ class PathwaySetMod(object):
                 self.pathway_set[i].evolve(params, optimum1, numerator_indexes, denominator_indexes, total, constraint, optimum_tolerance, iterations)
                 # This will write out the PathwaySetFlex object as a pickle file after each iteration
                 if self.running_pickle == True:
-                    pickle.dump(self, open(self.name+".p", "wb"))
+                    pickle.dump(self.pathway_set[i], open(self.pathway_set[i].name+".p", "wb"))
 
             self.evolved = True
             
@@ -317,10 +313,7 @@ class PathwaySetFlex(object):
                 # This will write out the PathwaySetFlex object as a pickle file after each iteration
                 # Need to convert te model object to sbml str for pickling and then convert back
                 if self.running_pickle == True:
-                    temp_model = copy(self.pathwayset[i].model)
-                    self.pathway_set[i].model = self.pathway_set[i].model.getCurrentSBML()
-                    pickle.dump(self, open(self.name+".p", "wb"))
-                    self.pathway_set[i].model = temp_model
+                    pickle.dump(self.pathway_set[i], open(self.pathway_set[i].name+".p", "wb"))
             
             self.evolved = True
             
