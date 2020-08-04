@@ -13,8 +13,22 @@ class PathwaySet(object):
         self.evolved = False
         self.name = name
         
-    def generate(self, model_string, num_pathways):
-        """Generate a set of Pathway() objects."""
+    def generate(self, model_string, num_pathways, running_pickle=False):
+        """Generate a set of Pathway() objects.
+
+        Parameters
+
+        ----------
+
+        model_string: string
+            antimony language model string
+        num_pathways: int
+            number of PathwayFlex objects to generate
+        running_pickle: bool
+            whether the object is pickled after evolution of each Pathway object
+        """
+
+        self.running_pickle = running_pickle)
         
         if bool(self.pathway_set) == False:
             ref_model = Pathway(model_string, name = "ref")
@@ -61,6 +75,10 @@ class PathwaySet(object):
 
             for i in range(len(self.pathway_set.keys())):
                 self.pathway_set[i].evolve(params, optimum1, numerator_indexes, denominator_indexes, total, constraint, optimum_tolerance, iterations)
+
+                # This will write out the PathwaySetFlex object as a pickle file after each iteration
+                if self.running_pickle == True:
+                    pickle.dump(self, open(self.name+".p", "wb"))
             
             self.evolved = True
             
@@ -115,8 +133,22 @@ class PathwaySetMod(object):
         self.evolved = False
         self.name = name
         
-    def generate(self, model_string, num_pathways):
-        """Generate a set of Pathway() objects."""
+    def generate(self, model_string, num_pathways, running_pickle=False):
+        """Generate a set of PathwayMod() objects.
+
+        Parameters
+
+        ----------
+
+        model_string: string
+            antimony language model string
+        num_pathways: int
+            number of PathwayMod objects to generate
+        running_pickle: bool
+            whether the object is pickled after evolution of each PathwayFlex object
+        """
+
+        self.running_pickle = running_pickle)
         
         if bool(self.pathway_set) == False:
             ref_model = PathwayMod(model_string, name = "ref")
@@ -163,7 +195,10 @@ class PathwaySetMod(object):
 
             for i in range(len(self.pathway_set.keys())):
                 self.pathway_set[i].evolve(params, optimum1, numerator_indexes, denominator_indexes, total, constraint, optimum_tolerance, iterations)
-            
+                # This will write out the PathwaySetFlex object as a pickle file after each iteration
+                if self.running_pickle == True:
+                    pickle.dump(self, open(self.name+".p", "wb"))
+
             self.evolved = True
             
         else:
@@ -215,9 +250,23 @@ class PathwaySetFlex(object):
         self.evolved = False
         self.name = name
         
-    def generate(self, model_string, num_pathways):
-        """Generate a set of Pathway() objects."""
-        # To make this accept a non-tellurium pathway model object would need to remove model_string dependence
+    def generate(self, model_string, num_pathways, running_pickle=False):
+        """Generate a set of PathwayFlex() objects.
+
+        Parameters
+
+        ----------
+
+        model_string: string
+            antimony language model string
+        num_pathways: int
+            number of PathwayFlex objects to generate
+        running_pickle: bool
+            whether the object is pickled after evolution of each PathwayFlex object
+        """
+
+        self.running_pickle = running_pickle
+
         if bool(self.pathway_set) == False:
             ref_model = PathwayFlex(model_string, name = "ref")
 
@@ -227,7 +276,7 @@ class PathwaySetFlex(object):
         else:
             raise Exception('A pathway set has already been generated.')
             
-    def evolve(self, params, W_func, W_func_args, mutation_func, mutation_func_args, Pfix_func, Pfix_func_args, direct_assign_mutations, optimum_tolerance, iterations, stop, MCA):
+    def evolve(self, params, W_func, W_func_args, mutation_func, mutation_func_args, Pfix_func, Pfix_func_args, direct_assign_mutations, optimum_tolerance, iterations, stop, MCA): 
 
         """Evolve all of the pathway objects stored in pathway_set. Using the built-in evolve function in Pathway.
 
@@ -259,6 +308,10 @@ class PathwaySetFlex(object):
 
             for i in range(len(self.pathway_set.keys())):
                 self.pathway_set[i].evolve(params, W_func, W_func_args, mutation_func, mutation_func_args, Pfix_func, Pfix_func_args, direct_assign_mutations, optimum_tolerance, iterations, stop, MCA)
+
+                # This will write out the PathwaySetFlex object as a pickle file after each iteration
+                if self.running_pickle == True:
+                    pickle.dump(self, open(self.name+".p", "wb"))
             
             self.evolved = True
             
