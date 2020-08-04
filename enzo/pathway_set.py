@@ -35,7 +35,7 @@ class PathwaySet(object):
 
             for i in range(num_pathways):
                 self.pathway_set[i] = copy(ref_model)
-                self.pathway_set[i].name = i
+                self.pathway_set[i].name = str(i)
         else:
             raise Exception('A pathway set has already been generated.')
             
@@ -156,7 +156,7 @@ class PathwaySetMod(object):
 
             for i in range(num_pathways):
                 self.pathway_set[i] = copy(ref_model)
-                self.pathway_set[i].name = i
+                self.pathway_set[i].name = str(i)
         else:
             raise Exception('A pathway set has already been generated.')
             
@@ -273,7 +273,7 @@ class PathwaySetFlex(object):
 
             for i in range(num_pathways):
                 self.pathway_set[i] = copy(ref_model)
-                self.pathway_set[i].name = i
+                self.pathway_set[i].name = str(i)
         else:
             raise Exception('A pathway set has already been generated.')
             
