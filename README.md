@@ -130,7 +130,7 @@ evolving_set.save_set()
 
 
 ```
-
+A Jupyter notebook containing an additional example, which makes use of the more flexible custom inputs for the fitness, mutation, and fixation probability functions can be found [here.](https://github.com/lcwheeler/enzo/blob/master/notebooks/custom-fitness-function-example.ipynb)
 
 ## Install
 
