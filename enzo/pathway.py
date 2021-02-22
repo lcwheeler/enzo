@@ -102,8 +102,8 @@ class Pathway(object):
 
         # Changes suggested by Kiri Choi to turn off steady state approximation
         ss = model.getSteadyStateSolver()
-        ss.allow_approx = False
-        ss.allow_presimulation = False
+        ss.allow_approx = True
+        ss.allow_presimulation = True
         
         # Turn off roadrunner logging to save memory
         roadrunner.Logger_disableLogging() 
@@ -405,8 +405,8 @@ class PathwayMod(object):
 
         # Changes suggested by Kiri Choi to turn off steady state approximation
         ss = model.getSteadyStateSolver()
-        ss.allow_approx = False
-        ss.allow_presimulation = False
+        ss.allow_approx = True
+        ss.allow_presimulation = True
         
         # Turn off roadrunner logging to save memory
         roadrunner.Logger_disableLogging() 
@@ -762,8 +762,8 @@ class PathwayFlex(object):
 
         # Changes suggested by Kiri Choi to turn off steady state approximation
         ss = model.getSteadyStateSolver()
-        ss.allow_approx = False
-        ss.allow_presimulation = False
+        ss.allow_approx = True
+        ss.allow_presimulation = True
         
         # Turn off roadrunner logging to save memory
         roadrunner.Logger_disableLogging() 
