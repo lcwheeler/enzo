@@ -652,8 +652,6 @@ class PathwayFlex(object):
 
         params: 1D array-like
             list of evolvable parameter key strings
-        optimum: int
-            optimum value that defines fitness peak
         W_func: function
             Custom fitness function
         W_func_args: dict()
@@ -684,7 +682,7 @@ class PathwayFlex(object):
         self.W_func_args_current = W_func_args["current"]
         self.W_func_args_mutant = W_func_args["mutant"]
 
-        # Determine if there is are arguments called 'optimum' and 'opt_metric' in W_func, to ask whether to use optimum tolerance
+        # Determine if there are arguments called 'optimum' and 'opt_metric' in W_func, to ask whether to use optimum tolerance
         # The downstream usage of the 'optimum' arg will also require the 'opt_metric' arg. 
         if "optimum" in list(self.W_func.__code__.co_varnames) and "opt_metric" in list(self.W_func.__code__.co_varnames):
             peak = True
@@ -696,7 +694,7 @@ class PathwayFlex(object):
             print("You are trying to use the optimum variable without an opt_metric")
 
         elif "optimum" not in list(self.W_func.__code__.co_varnames) and "opt_metric" in list(self.W_func.__code__.co_varnames):
-            print("You are trying to use the optimum variable without an opt_metric")
+            print("You are trying to use the opt_metric variable without an optimum")
 
         else:
             peak = False
