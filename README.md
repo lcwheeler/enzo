@@ -1,8 +1,8 @@
 # enzo
 *enzo* is a Python wrapper for Tellurium that allows evolution of metabolic models between defined phenotypic states.
 Please use enzo in a Python 3.6+ environment to ensure compatibility. This package is 
-a work in progress. It is neither as fast nor as generalizable as I would like it to be, but I am working toward 
-improvements to make it more flexible. It is definitely a work in progress, hence the reason that the code is in flux.
+a work in progress, hence the reason that the code is in flux. It is neither as fast nor as generalizable as I would 
+like it to be, but I am working toward improvements to make it more flexible.
 The main reason I have made *enzo* available is to ensure that the work I have used it for can be readily reproduced 
 after installing the package. However, feel free to use *enzo* for other projects at your own peril! Currently there 
 is no Documentation page, beyond this README and the example Jupyter notebooks, but I will work on that after my 
